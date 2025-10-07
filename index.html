@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gsap Frame Animation</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: monospace;
+      }
+
+      .wrapper {
+        width: 100%;
+        background-color: rgb(9, 11, 14);
+        color: white;
+      }
+      .preloader {
+        width: 100%;
+        height: 100dvh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        gap: 3rem;
+      }
+      .preloader p {
+        font-size: 1.5rem;
+      }
+      .preloader h2 {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        display: none;
+        text-align: center;
+        font-weight: 100;
+      }
+      .parent {
+        width: 100%;
+        height: 700vh;
+        position: relative;
+        top: 0;
+        left: 0;
+        display: none;
+      }
+      .canvas-wrapper {
+        width: 100%;
+        height: 100dvh;
+        position: sticky;
+        top: 0;
+        left: 0;
+      }
+      #canvas {
+        width: 100%;
+        height: 100dvh;
+      }
+      .outro {
+        width: 100%;
+        height: 100dvh;
+        display: none;
+        display: none;
+        justify-content: center;
+        align-items: center;
+      }
+      .outro p{
+        font-size: 1.5rem;
+      }
+      @media (max-width : 425px) {
+        .preloader h2 {
+        display: inline-block;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="preloader">
+        <h2 class="mobile-warning">Use desktop or landscape screen for better experience</h2>
+        <p>Loading</p>
+      </div>
+
+      <div class="parent">
+        <div class="canvas-wrapper">
+          <canvas id="canvas"></canvas>
+        </div>
+      </div>
+
+      <div class="outro">
+        <p>😎</p>
+      </div>
+    </div>
+
+    <script src="./gsap.min.js"></script>
+    <script src="./ScrollTrigger.min.js"></script>
+    <script>
+      const canvas = document.getElementById("canvas");
+      const preloader = document.querySelector(".preloader");
+
+      const canvasContext = canvas.getContext("2d");
+
+      const frames = {
+        currentIndex: 0,
+        maxIndex: 300,
+      };
+
+      let imageLoaded = 0;
+      let images = [];
+
+      function loadImage(index) {
+        if (index >= 0 && index < frames.maxIndex) {
+          const img = images[index];
+
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+
+          const scaleX = canvas.width / img.width;
+          const scaleY = canvas.height / img.height;
+          const scale = Math.max(scaleX, scaleY);
+
+          const newWidth = img.width * scaleX;
+          const newHeight = img.height * scaleY;
+
+          const offsetX = (canvas.width - newWidth) / 2;
+          const offsetY = (canvas.height - newHeight) / 2;
+
+          canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+          canvasContext.imageSmoothingEnabled = true;
+          canvasContext.imageSmoothingQuality = "high";
+          canvasContext.drawImage(img, offsetX, offsetY, newWidth, newHeight);
+          frames.currentIndex = index;
+        }
+      }
+
+      function preloadImages() {
+        for (let i = 1; i <= frames.maxIndex; i++) {
+          const imgUrl = `./frames/frame_${i.toString().padStart(4, "0")}.jpeg`;
+          const img = new Image();
+          img.src = imgUrl;
+          img.onload = () => {
+            imageLoaded++;
+            preloader.querySelector("p").innerText = `Loading. ${(
+              (imageLoaded * 100) /
+              frames.maxIndex
+            ).toFixed(2)} / 100`;
+            images.push(img);
+            if (imageLoaded === frames.maxIndex) {
+              gsap.to(".preloader p", {
+                opacity: 0,
+                duration: 2,
+                onComplete: () => {
+                  preloader.innerHTML = `<h2 class="mobile-warning">Use desktop or landscape screen for better experience</h2>
+        <p>Scroll Down</p>`;
+                  document.querySelector(".parent").style.display = "block";
+                },
+              });
+              loadImage(frames.currentIndex);
+              startAnimation();
+              document.querySelector(".outro").style.display = "flex";
+            }
+          };
+        }
+      }
+
+      function startAnimation() {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: ".parent",
+            start: "top top",
+            scrub: 2,
+          },
+        });
+
+        tl.to(frames, {
+          currentIndex: frames.maxIndex - 1,
+          onUpdate: () => {
+            loadImage(Math.floor(frames.currentIndex));
+          },
+        });
+      }
+      preloadImages();
+    </script>
+  </body>
+</html>
