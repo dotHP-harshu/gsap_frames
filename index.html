@@ -28,12 +28,14 @@
         padding: 1rem;
         background: linear-gradient(180deg, #0000004c, #000000b8);
         z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.5s ease;
       }
       #scroll-indecator span {
         font-size: 2rem;
         letter-spacing: -10px;
         transform: rotate(90deg) translateY(-50%);
-        
       }
 
       .preloader {
@@ -170,31 +172,39 @@
 
       function preloadImages() {
         for (let i = 1; i <= frames.maxIndex; i++) {
+          let index = i - 1;
           const imgUrl = `./frames/frame_${i.toString().padStart(4, "0")}.jpeg`;
           const img = new Image();
-          img.src = imgUrl;
           img.onload = () => {
             imageLoaded++;
             preloader.querySelector("p").innerText = `Loading. ${(
               (imageLoaded * 100) /
               frames.maxIndex
             ).toFixed(2)} / 100`;
-            images.push(img);
+            images[index] = img;
             if (imageLoaded === frames.maxIndex) {
+              gsap.to("#scroll-indecator", {
+                autoAlpha: 1,
+                duration: 0.5,
+                delay: 0.3,
+              });
+
               gsap.to(".preloader p", {
                 opacity: 0,
                 duration: 0.5,
                 onComplete: () => {
                   preloader.innerHTML = `<h2 class="mobile-warning">Use desktop or landscape screen for better experience</h2>
-        <p>Scroll Down</p>`;
+                  <p>Scroll Down</p>`;
                   document.querySelector(".parent").style.display = "block";
                 },
               });
+
               loadImage(frames.currentIndex);
               startAnimation();
               document.querySelector(".outro").style.display = "flex";
             }
           };
+          img.src = imgUrl;
         }
       }
 
