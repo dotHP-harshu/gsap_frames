@@ -17,6 +17,25 @@
         background-color: rgb(9, 11, 14);
         color: white;
       }
+      #scroll-indecator {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        padding: 1rem;
+        background: linear-gradient(180deg, #0000004c, #000000b8);
+        z-index: 1000;
+      }
+      #scroll-indecator span {
+        font-size: 2rem;
+        letter-spacing: -10px;
+        transform: rotate(90deg) translateY(-50%);
+        
+      }
+
       .preloader {
         width: 100%;
         height: 100dvh;
@@ -63,20 +82,26 @@
         justify-content: center;
         align-items: center;
       }
-      .outro p{
-        font-size: 1.5rem;
+      .outro p {
+        font-size: 5rem;
       }
-      @media (max-width : 425px) {
+      @media (max-width: 425px) {
         .preloader h2 {
-        display: inline-block;
+          display: inline-block;
         }
       }
     </style>
   </head>
   <body>
     <div class="wrapper">
+      <div id="scroll-indecator">
+        <span>&gt; &gt;</span>
+      </div>
+
       <div class="preloader">
-        <h2 class="mobile-warning">Use desktop or landscape screen for better experience</h2>
+        <h2 class="mobile-warning">
+          Use desktop or landscape screen for better experience
+        </h2>
         <p>Loading</p>
       </div>
 
@@ -106,6 +131,17 @@
 
       let imageLoaded = 0;
       let images = [];
+
+      // Hide scroll-indicator when outro is visible
+      gsap.to("#scroll-indecator", {
+        scrollTrigger: {
+          trigger: ".outro",
+          start: "top start", // Adjust as needed
+          toggleActions: "play none none reverse",
+        },
+        autoAlpha: 0, // Hides with opacity and visibility
+        duration: 0.5,
+      });
 
       function loadImage(index) {
         if (index >= 0 && index < frames.maxIndex) {
